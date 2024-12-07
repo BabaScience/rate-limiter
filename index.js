@@ -8,8 +8,9 @@ const redis = new Redis();
 const X_RateLimit_Limit = 5;
 const X_RateLimit_Retry_After = 120;
 const X_RateLimit_Remaining = 0;
+const KeyPrefix = 'api_rate_limit';
 
-const rateLimiter = new RateLimiter(redis, 'api_rate_limit', X_RateLimit_Limit, X_RateLimit_Limit);
+const rateLimiter = new RateLimiter(redis, KeyPrefix, X_RateLimit_Limit, X_RateLimit_Limit);
 
 // Middleware for rate limiting
 app.use(async (req, res, next) => {
