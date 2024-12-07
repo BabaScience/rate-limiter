@@ -1,9 +1,15 @@
 const express = require('express');
 const Redis = require('ioredis');
 const RateLimiter = require('./RateLimiter');
+const dotenv = require('dotenv');
+dotenv.config();
+
+const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
+
+console.log('REDIS_URL:', REDIS_URL);
 
 const app = express();
-const redis = new Redis();
+const redis = new Redis(REDIS_URL);
 
 const X_RateLimit_Limit = 5;
 const X_RateLimit_Retry_After = 120;
@@ -30,6 +36,11 @@ app.use(async (req, res, next) => {
     console.error('Rate limiting error:', error);
     next()
   }
+});
+
+// Home
+app.get('/', (req, res) => {
+  res.send('There is nothing here. Go to /api/resource');
 });
 
 // Sample API route
