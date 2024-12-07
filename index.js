@@ -5,7 +5,11 @@ const RateLimiter = require('./RateLimiter');
 const app = express();
 const redis = new Redis();
 
-const rateLimiter = new RateLimiter(redis, 'api_rate_limit', 10, 3);
+const X_RateLimit_Limit = 5;
+const X_RateLimit_Retry_After = 120;
+const X_RateLimit_Remaining = 0;
+
+const rateLimiter = new RateLimiter(redis, 'api_rate_limit', X_RateLimit_Limit, X_RateLimit_Limit);
 
 // Middleware for rate limiting
 app.use(async (req, res, next) => {
@@ -16,11 +20,14 @@ app.use(async (req, res, next) => {
     if (allowed) {
       next();
     } else {
-      res.status(429).json({ error: 'Rate limit exceeded' });
+      res.header('X-RateLimit-Limit', X_RateLimit_Limit)
+          .header('X-RateLimit-Remaining', X_RateLimit_Remaining)
+          .header('X-RateLimit-Retry-After', X_RateLimit_Retry_After)
+          .status(429).json({ error: 'Rate limit exceeded' });
     }
   } catch (error) {
     console.error('Rate limiting error:', error);
-    next(); // Proceed without rate limiting in case of an error
+    next()
   }
 });
 
